@@ -51,3 +51,25 @@ sprzedaz_dluga<-sprzedaz %>%
     values_to = "naleznosci"
   ) 
 
+
+unikalne_daty<-unique(sprzedaz_dluga$Date)
+unikalne_daty<-unikalne_daty[unikalne_daty>as.Date("2023-12-31")]
+
+
+oblicz_roczna_sprzedaz <- function(dzien) {
+  dane_dnia <- subset(sprzedaz_dluga, Date > dzien - days(365) & Date <= dzien)
+  roczna_sprzedaz <- aggregate(naleznosci ~ handlowiec, data = dane_dnia, sum)
+  return(data.frame(data = dzien, roczna_sprzedaz))
+}
+
+wyniki2 <- lapply(unikalne_daty[1:365], oblicz_roczna_sprzedaz)
+
+# Konwersja wyników do ramki danych
+wyniki2 <- do.call(rbind, wyniki2)
+
+
+
+
+
+
+

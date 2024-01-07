@@ -234,7 +234,7 @@ colnames(TabelaDoNaleznosci)<-NazwyKol
 dane<-TabelaDoNaleznosci
 # Funkcja do obliczania średniego poziomu rocznych należności dla danego dnia
 oblicz_roczna_sprzedaz <- function(dzien) {
-  dane_dnia <- subset(dane, data > dzien - days(360) & data <= dzien)
+  dane_dnia <- subset(dane, data > dzien - days(365) & data <= dzien)
   srednie_naleznosci <- aggregate(naleznosci ~ handlowiec, data = dane_dnia, mean)
   return(data.frame(data = dzien, srednie_naleznosci))
 }
