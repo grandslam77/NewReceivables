@@ -11,16 +11,16 @@ TabelaSAP    <- TabelaSAP %>% dplyr::filter(substr(`Dok. rozl.`, 1, 2) != "98"|i
 
 ######################################################################################################
 
-# KOMPENSATY WISZĄCE ###################################################################################
+# KOMPENSATY WISZĄCE #################################################################################
 
 # Kompensaty   <- TabelaSAP %>% subset(Przypisanie=="KOMPENSATA")
 Kompensaty  <- TabelaSAP %>% subset(Referencja=="KOMPENSATA")
 
 # Kompensaty   <- rbind(Kompensaty,Kompensaty2) %>% distinct() # kompensaty wybieramy po polu REFERENCJA
 Kompensaty   <- Kompensaty %>% subset(Rozlicz.>Wprowadz.) # kompensaty wiszące na koncie, zawsze mają
-########################################################################################################
+######################################################################################################
 
-# PRZELEWY WISZĄCE #######################################################################################
+# PRZELEWY WISZĄCE ###################################################################################
 Przelewy  <- TabelaSAP %>% subset(Rodzaj %in% c("WB","WX"))
 Przelewy  <- Przelewy %>% subset(Rozlicz.>`Data dok.`+days(1)) # kompensaty wiszące na koncie, zawsze mają
 
@@ -30,7 +30,7 @@ Przelewy  <-Przelewy[!grepl("POŻYCZKA", Przelewy$Opis, ignore.case = TRUE), ]
 Przelewy  <-Przelewy[!grepl("SPŁATA POŻYCZKI", Przelewy$Opis, ignore.case = TRUE), ]
 Przelewy  <- subset(Przelewy, !grepl("WADIUM", Opis))
 Przelewy <- subset(Przelewy, !grepl("ZNWU", Opis,ignore.case = TRUE))
-###########################################################################################################
+######################################################################################################
 # Przypisać do każdej pozycji 
 
 
@@ -229,14 +229,14 @@ unikalne_daty      <-seq(data_startowa-days(360),data_startowa,by="day")
 
 TabelaDoNaleznosci <- as.data.frame(NaleznosciDzienne) %>% select(dni_na_saldzie,Opiekunowie,AverageReceivables)
 
-NazwyKol<-c('data', 'handlowiec' ,'sprzedaz')
+NazwyKol<-c('data', 'handlowiec' ,'naleznosci')
 colnames(TabelaDoNaleznosci)<-NazwyKol
 dane<-TabelaDoNaleznosci
 # Funkcja do obliczania średniego poziomu rocznych należności dla danego dnia
 oblicz_roczna_sprzedaz <- function(dzien) {
   dane_dnia <- subset(dane, data > dzien - days(360) & data <= dzien)
-  roczna_sprzedaz <- aggregate(sprzedaz ~ handlowiec, data = dane_dnia, mean)
-  return(data.frame(data = dzien, roczna_sprzedaz))
+  srednie_naleznosci <- aggregate(naleznosci ~ handlowiec, data = dane_dnia, mean)
+  return(data.frame(data = dzien, srednie_naleznosci))
 }
 
 # Unikalne daty w ramce danych
@@ -258,8 +258,8 @@ for (i in 1:365) {
   dane_dnia <- TabelaDoNaleznosci[TabelaDoNaleznosci$data == dzien, ]
   
   # Oblicz roczną sprzedaż dla każdego handlowca
-  roczna_sprzedaz <- aggregate(sprzedaz ~ handlowiec, data = dane_dnia, mean) %>% mutate(DataSalda=dzien)
-  browser()
+  roczna_sprzedaz <- aggregate(naleznosci ~ handlowiec, data = dane_dnia, mean) %>% mutate(DataSalda=dzien)
+
   # Dodaj dane do ramki wynikowej
   wyniki_naleznosci <- rbind(wyniki_naleznosci, roczna_sprzedaz)
 }
